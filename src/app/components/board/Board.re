@@ -1,4 +1,37 @@
+type action =
+  | UserClick;
+
+type box={
+    isFilled: bool,
+    userId: int,
+    numberOfBalls: int,
+};
+
+type state = {
+  gameState: array(array(box)),
+  chaceSequence:int,
+};
+
 let component = ReasonReact.reducerComponent("Board");
+
+let rec getGameStateRow = (columnIndex, dimension) => 
+            columnIndex == dimension ? [||] : Array.append([|{
+                    isFilled: false,
+                    userId: -1,
+                    numberOfBalls: 0,
+                }|], getGameStateRow(columnIndex+1, dimension));
+
+let rec getGameState = (rowIndex, dimension) => {
+        rowIndex == dimension ? [||]: Array.append([|getGameStateRow(0, dimension)|], getGameState(rowIndex+1, dimension));
+}
+
+let initialState = (dimension : int) => () => {
+        let gameState:array(array(box)) = getGameState(0, dimension);
+        {
+            gameState,
+            chaceSequence:0
+        }
+    }
 
 let myStyle = ReactDOMRe.Style.make(
     ~height="100%", 
@@ -7,49 +40,10 @@ let myStyle = ReactDOMRe.Style.make(
     ()
     );
     
-type box={
-    isFilled: bool,
-    userId: int,
-    numberOfBalls: int,
-};
-
-type state = {
-  gameState: list(list(box)),
-  chaceSequence:int,
-};
-
-/* let initialState = {
-  gameState: ,
-  chaceSequence:0,
-}; */
-let getGameStateRow(columnIndex, dimension){
-    if(columnIndex === dimension){
-        []
-    }
-    [{
-        isFilled: false,
-        userId: -1,
-        numberOfBalls: 0,
-    }].conacat(gameStateRow(columnIndex+1, dimension));
-}
-
-let getGameState = (rowIndex, dimension) => {
-    if(rowIndex === dimension){
-        getGameStateRow(dimension);
-    }
-}
-
-let make = (dimension, ~numberOfPlayers, _children) => {
+let make = (~dimension, _children) => {
     ...component, 
-    initialState: () => {
-        let gameState:list(list(box)) = getGameState(dimension);
-        
-        {
-            gameState,
-            chaceSequence:0
-        }
-    },
-    reducer: (_action, _state) => ReasonReact.NoUpdate,
+    initialState:initialState(dimension),
+    reducer: (_action:action, _state:state) => ReasonReact.NoUpdate,
     render: _self =>  {
         <div style=myStyle>
         <div>(ReasonReact.string("Welcome to Chain Reaction Version 1"))</div>

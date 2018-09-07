@@ -11,5 +11,5 @@
 let component = ReasonReact.statelessComponent("ChainReaction");
 let make = _children => {
     ...component, 
-    render: _self => <div style=myStyle> <Board dimension=16 numberOfPlayers=4/> </div>
+    render: _self => <div style=myStyle> <Board dimension=16 /> </div>
 };
