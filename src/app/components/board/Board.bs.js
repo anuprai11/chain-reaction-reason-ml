@@ -3,7 +3,22 @@
 
 var $$Array = require("bs-platform/lib/js/array.js");
 var React = require("react");
+var Caml_array = require("bs-platform/lib/js/caml_array.js");
 var ReasonReact = require("reason-react/src/ReasonReact.js");
+var Box$ReactTemplate = require("../box/Box.bs.js");
+
+var colorPallet = /* array */[
+  "black",
+  "red",
+  "green",
+  "blue",
+  "yellow"
+];
+
+var dummyUser = /* record */[
+  /* userId */-1,
+  /* userColorCode */-1
+];
 
 var component = ReasonReact.reducerComponent("Board");
 
@@ -31,9 +46,32 @@ function getGameState(rowIndex, dimension) {
 
 function initialState(dimension, _) {
   var gameState = getGameState(0, dimension);
+  var gameUsersConfig_001 = /* users : array */[
+    /* record */[
+      /* userId */1,
+      /* userColorCode */1
+    ],
+    /* record */[
+      /* userId */2,
+      /* userColorCode */2
+    ],
+    /* record */[
+      /* userId */3,
+      /* userColorCode */3
+    ],
+    /* record */[
+      /* userId */4,
+      /* userColorCode */4
+    ]
+  ];
+  var gameUsersConfig = /* record */[
+    /* userCount */4,
+    gameUsersConfig_001
+  ];
   return /* record */[
           /* gameState */gameState,
-          /* chaceSequence */0
+          /* chaceSequence */0,
+          /* gameUsersConfig */gameUsersConfig
         ];
 }
 
@@ -42,6 +80,24 @@ var myStyle = {
   height: "100%",
   width: "100%"
 };
+
+function getBoxStyles(color) {
+  return {
+          backgroundColor: color,
+          border: "1px solid red"
+        };
+}
+
+function getColorForBalls(userId, userConfig) {
+  var match = userId === -1;
+  var user = match ? dummyUser : Caml_array.caml_array_get(userConfig[/* users */1], userId);
+  var colorCode = user[/* userColorCode */1];
+  if (colorCode > 4 || colorCode < 1) {
+    return "black";
+  } else {
+    return Caml_array.caml_array_get(colorPallet, colorCode);
+  }
+}
 
 function make(dimension, _) {
   return /* record */[
@@ -54,10 +110,15 @@ function make(dimension, _) {
           /* willUnmount */component[/* willUnmount */6],
           /* willUpdate */component[/* willUpdate */7],
           /* shouldUpdate */component[/* shouldUpdate */8],
-          /* render */(function () {
+          /* render */(function (_self) {
               return React.createElement("div", {
                           style: myStyle
-                        }, React.createElement("div", undefined, "Welcome to Chain Reaction Version 1"));
+                        }, React.createElement("div", undefined, $$Array.map((function (boxItemArr) {
+                                    return React.createElement("div", undefined, $$Array.map((function (boxItem) {
+                                                      var color = getColorForBalls(boxItem[/* userId */1], _self[/* state */1][/* gameUsersConfig */2]);
+                                                      return ReasonReact.element(/* None */0, /* None */0, Box$ReactTemplate.make(boxItem, getBoxStyles(color), /* array */[]));
+                                                    }), boxItemArr));
+                                  }), _self[/* state */1][/* gameState */0])));
             }),
           /* initialState */(function (param) {
               return initialState(dimension, param);
@@ -71,10 +132,14 @@ function make(dimension, _) {
         ];
 }
 
+exports.colorPallet = colorPallet;
+exports.dummyUser = dummyUser;
 exports.component = component;
 exports.getGameStateRow = getGameStateRow;
 exports.getGameState = getGameState;
 exports.initialState = initialState;
 exports.myStyle = myStyle;
+exports.getBoxStyles = getBoxStyles;
+exports.getColorForBalls = getColorForBalls;
 exports.make = make;
 /* component Not a pure module */
